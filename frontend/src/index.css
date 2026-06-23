@@ -1,0 +1,217 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #0f172a 0%, #1e40af 50%, #3b82f6 100%);
+  min-height: 100vh;
+  color: #1f2937;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.6s ease forwards;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+/* Navbar */
+nav {
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid #e2e8f0;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+/* Stats Cards */
+.stats-card {
+  background: white;
+  border-radius: 20px;
+  padding: 28px;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+  transition: all 0.4s ease;
+  border-left: 6px solid #3b82f6;
+}
+
+.stats-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 25px 45px rgba(0,0,0,0.2);
+}
+
+/* Buttons */
+.new-opp-btn {
+  background: linear-gradient(135deg, #1e40af, #3b82f6);
+  color: white;
+  padding: 14px 28px;
+  border-radius: 50px;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s;
+  animation: pulse 2s infinite;
+}
+
+.new-opp-btn:hover {
+  transform: scale(1.08);
+  box-shadow: 0 10px 20px rgba(59, 130, 246, 0.5);
+}
+
+.logout-btn {
+  color: #ef4444;
+  font-weight: 600;
+  padding: 10px 20px;
+  border-radius: 50px;
+  transition: all 0.3s;
+}
+
+.logout-btn:hover {
+  background: #fee2e2;
+}
+
+/* Action Buttons */
+.action-btn {
+  padding: 8px 16px;
+  border-radius: 12px;
+  font-weight: 600;
+  transition: all 0.3s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.edit-btn {
+  background: #2563eb;
+  color: white;
+}
+
+.edit-btn:hover {
+  background: #1d4ed8;
+  transform: translateY(-2px);
+}
+
+.delete-btn {
+  background: #ef4444;
+  color: white;
+}
+
+.delete-btn:hover {
+  background: #dc2626;
+  transform: translateY(-2px);
+}
+
+/* Filters */
+.filter-btn {
+  padding: 10px 22px;
+  border-radius: 50px;
+  font-weight: 600;
+  transition: all 0.3s;
+  background: white;
+  border: 2px solid #e2e8f0;
+}
+
+.filter-btn.active {
+  background: linear-gradient(135deg, #1e40af, #3b82f6);
+  color: white;
+  border-color: #1e40af;
+}
+
+/* Table */
+.table-container {
+  background: white;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+}
+
+/* Form Container */
+.form-container {
+  background: white;
+  border-radius: 24px;
+  box-shadow: 0 25px 60px rgba(0,0,0,0.3);
+  padding: 40px;
+}
+
+.input-field {
+  width: 100%;
+  padding: 14px;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 1.05rem;
+}
+
+/* Extra Animations */
+.action-btn {
+  transition: all 0.3s ease;
+}
+
+.action-btn:hover {
+  transform: scale(1.08);
+  box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+}
+
+.filter-btn {
+  transition: all 0.3s ease;
+}
+
+.filter-btn:hover:not(.active) {
+  transform: translateY(-2px);
+}
+
+.stats-card {
+  transition: all 0.4s ease;
+}
+
+.min-h-screen { min-height: 100vh; }
+.py-12 { padding-top: 3rem; padding-bottom: 3rem; }
+.max-w-2xl { max-width: 42rem; }
+.mx-auto { margin-left: auto; margin-right: auto; }
+.px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+.flex { display: flex; }
+.gap-4 { gap: 1rem; }
+.gap-6 { gap: 1.5rem; }
+.pt-6 { padding-top: 1.5rem; }
+.grid { display: grid; }
+.grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+.space-y-6 > * + * { margin-top: 1.5rem; }
+
+@media (min-width: 768px) {
+  .md\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .md\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+@media (max-width: 900px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .form-container {
+    padding: 20px !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .dash-header-row {
+    flex-wrap: wrap !important;
+    height: auto !important;
+    padding: 12px 16px !important;
+    row-gap: 10px;
+  }
+}
