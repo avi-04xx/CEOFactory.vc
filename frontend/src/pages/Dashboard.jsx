@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import api from '../services/api';
 
 const STAGES = ['All', 'New', 'Contacted', 'Qualified', 'Proposal Sent', 'Won', 'Lost'];
 
@@ -17,11 +17,9 @@ const stageStyle = (stage) => {
 };
 
 const priorityStyle = (p) =>
-  p === 'High'
-    ? { bg: '#fff1f2', color: '#dc2626' }
-    : p === 'Medium'
-    ? { bg: '#fffbeb', color: '#d97706' }
-    : { bg: '#f0fdf4', color: '#16a34a' };
+  p === 'High' ? { bg: '#fff1f2', color: '#dc2626' } :
+  p === 'Medium' ? { bg: '#fffbeb', color: '#d97706' } :
+  { bg: '#f0fdf4', color: '#16a34a' };
 
 const initials = (name = '') =>
   name.split(' ').slice(0, 2).map((w) => w[0]).join('').toUpperCase();
@@ -50,29 +48,30 @@ const Dashboard = () => {
 
   const fetchOpportunities = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const res = await axios.get('http://localhost:2000/api/opportunities', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await api.get('/api/opportunities');
       setOpportunities(res.data);
-      const decoded = JSON.parse(atob(token.split('.')[1]));
-      setCurrentUserId(decoded.id);
-    } catch {
+      
+      const token = localStorage.getItem('token');
+      if (token) {
+        const decoded = JSON.parse(atob(token.split('.')[1]));
+        setCurrentUserId(decoded.id || decoded.userId);
+      }
+    } catch (err) {
       setError('Failed to load opportunities');
+      console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => { fetchOpportunities(); }, []);
+  useEffect(() => {
+    fetchOpportunities();
+  }, []);
 
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this opportunity?')) return;
     try {
-      const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:2000/api/opportunities/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await api.delete(`/api/opportunities/${id}`);
       fetchOpportunities();
     } catch {
       alert('Delete failed');
@@ -84,15 +83,14 @@ const Dashboard = () => {
     navigate('/login');
   };
 
-  const filteredOpps =
-    filter === 'All' ? opportunities : opportunities.filter((o) => o.stage === filter);
+  const filteredOpps = filter === 'All' 
+    ? opportunities 
+    : opportunities.filter((o) => o.stage === filter);
 
   const getCount = (label) =>
-    label === 'Total'
-      ? opportunities.length
-      : opportunities.filter((o) => o.stage === label).length;
+    label === 'Total' ? opportunities.length : opportunities.filter((o) => o.stage === label).length;
 
-  if (loading)
+  if (loading) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8fafc' }}>
         <div style={{ textAlign: 'center' }}>
@@ -101,18 +99,19 @@ const Dashboard = () => {
         </div>
       </div>
     );
+  }
 
   return (
     <div style={{ minHeight: '100vh', background: '#f1f5f9', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
 
-      {/* NAV */}
+      {/* NAV - Your Original Style */}
       <nav style={{ background: '#fff', borderBottom: '1px solid #e2e8f0', position: 'sticky', top: 0, zIndex: 50 }}>
         <div style={{ maxWidth: 1400, margin: '0 auto', padding: '0 24px', height: 68, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <div style={{ width: 40, height: 40, borderRadius: 10, background: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>🏢</div>
             <div>
               <h1 style={{ fontSize: 18, fontWeight: 700, color: '#0f172a', margin: 0, letterSpacing: '-0.3px' }}>CEO Factory</h1>
-              <p style={{ fontSize: 12, color: '#94a3b8', margin: 0 }}>Recruitment & HR Tracker</p>
+              <p style={{ fontSize: 12, color: '#94a3b8', margin: 0 }}>Opportunity Tracker</p>
             </div>
           </div>
           <div style={{ display: 'flex', gap: 10 }}>
@@ -134,11 +133,7 @@ const Dashboard = () => {
 
       <div style={{ maxWidth: 1400, margin: '0 auto', padding: '28px 24px' }}>
 
-        {error && (
-          <div style={{ background: '#fff1f2', border: '1px solid #fecdd3', borderRadius: 8, padding: '12px 16px', color: '#be123c', marginBottom: 20, fontSize: 14 }}>
-            ⚠️ {error}
-          </div>
-        )}
+        {error && <div style={{ background: '#fee2e2', color: '#be123c', padding: '12px', borderRadius: 8, marginBottom: 20 }}>⚠️ {error}</div>}
 
         {/* STAT CARDS */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 24 }}>
@@ -188,9 +183,9 @@ const Dashboard = () => {
 
         {/* TABLE */}
         <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #e2e8f0', overflow: 'hidden' }}>
-          <div style={{ padding: '16px 20px', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ padding: '16px 20px', borderBottom: '1px solid #f1f5f9' }}>
             <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: '#0f172a' }}>
-              {filteredOpps.length} {filter === 'All' ? 'total' : filter.toLowerCase()} {filteredOpps.length === 1 ? 'opportunity' : 'opportunities'}
+              {filteredOpps.length} {filter === 'All' ? 'total' : filter.toLowerCase()} opportunities
             </p>
           </div>
 
@@ -218,71 +213,29 @@ const Dashboard = () => {
                     const av = avatarColor(opp.customerName);
                     const sg = stageStyle(opp.stage);
                     const pg = priorityStyle(opp.priority);
-                    const isOwner = opp.owner?._id === currentUserId;
+                    const isOwner = opp.owner?._id === currentUserId || opp.owner === currentUserId;
                     return (
-                      <tr
-                        key={opp._id}
-                        style={{ borderBottom: '1px solid #f1f5f9', transition: 'background 0.1s' }}
-                        onMouseEnter={(e) => e.currentTarget.style.background = '#f8fafc'}
-                        onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                      >
-                        {/* Customer */}
+                      <tr key={opp._id} style={{ borderBottom: '1px solid #f1f5f9' }} onMouseEnter={(e) => e.currentTarget.style.background = '#f8fafc'} onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
                         <td style={{ padding: '14px 16px' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                            <div style={{ width: 34, height: 34, borderRadius: '50%', background: av.bg, color: av.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, flexShrink: 0 }}>
+                            <div style={{ width: 34, height: 34, borderRadius: '50%', background: av.bg, color: av.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700 }}>
                               {initials(opp.customerName)}
                             </div>
                             <span style={{ fontSize: 14, fontWeight: 500, color: '#0f172a' }}>{opp.customerName}</span>
                           </div>
                         </td>
-
-                        {/* Requirement */}
                         <td style={{ padding: '14px 16px', fontSize: 14, color: '#475569', maxWidth: 280 }}>
-                          <span style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                            {opp.requirement}
-                          </span>
+                          <span style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{opp.requirement}</span>
                         </td>
-
-                        {/* Value */}
-                        <td style={{ padding: '14px 16px', fontSize: 14, fontWeight: 600, color: '#15803d' }}>
-                          ₹{opp.estimatedValue?.toLocaleString('en-IN') || 0}
-                        </td>
-
-                        {/* Stage */}
-                        <td style={{ padding: '14px 16px' }}>
-                          <span style={{ background: sg.bg, color: sg.color, borderRadius: 20, padding: '4px 12px', fontSize: 12, fontWeight: 600 }}>
-                            {opp.stage}
-                          </span>
-                        </td>
-
-                        {/* Priority */}
-                        <td style={{ padding: '14px 16px' }}>
-                          <span style={{ background: pg.bg, color: pg.color, borderRadius: 20, padding: '4px 12px', fontSize: 12, fontWeight: 600 }}>
-                            {opp.priority}
-                          </span>
-                        </td>
-
-                        {/* Follow-up */}
-                        <td style={{ padding: '14px 16px', fontSize: 13, color: '#64748b' }}>
-                          {opp.nextFollowUpDate ? new Date(opp.nextFollowUpDate).toLocaleDateString('en-IN') : '—'}
-                        </td>
-
-                        {/* Actions */}
+                        <td style={{ padding: '14px 16px', fontSize: 14, fontWeight: 600, color: '#15803d' }}>₹{opp.estimatedValue?.toLocaleString('en-IN') || 0}</td>
+                        <td style={{ padding: '14px 16px' }}><span style={{ background: sg.bg, color: sg.color, borderRadius: 20, padding: '4px 12px', fontSize: 12, fontWeight: 600 }}>{opp.stage}</span></td>
+                        <td style={{ padding: '14px 16px' }}><span style={{ background: pg.bg, color: pg.color, borderRadius: 20, padding: '4px 12px', fontSize: 12, fontWeight: 600 }}>{opp.priority}</span></td>
+                        <td style={{ padding: '14px 16px', fontSize: 13, color: '#64748b' }}>{opp.nextFollowUpDate ? new Date(opp.nextFollowUpDate).toLocaleDateString('en-IN') : '—'}</td>
                         <td style={{ padding: '14px 16px' }}>
                           {isOwner ? (
                             <div style={{ display: 'flex', gap: 8 }}>
-                              <button
-                                onClick={() => navigate(`/edit/${opp._id}`)}
-                                style={{ background: '#eff6ff', color: '#2563eb', border: 'none', borderRadius: 7, padding: '6px 14px', fontSize: 13, fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5 }}
-                              >
-                                ✏️ Edit
-                              </button>
-                              <button
-                                onClick={() => handleDelete(opp._id)}
-                                style={{ background: '#fff1f2', color: '#be123c', border: 'none', borderRadius: 7, padding: '6px 14px', fontSize: 13, fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5 }}
-                              >
-                                🗑️ Delete
-                              </button>
+                              <button onClick={() => navigate(`/edit/${opp._id}`)} style={{ background: '#eff6ff', color: '#2563eb', border: 'none', borderRadius: 7, padding: '6px 14px', fontSize: 13, fontWeight: 500, cursor: 'pointer' }}>✏️ Edit</button>
+                              <button onClick={() => handleDelete(opp._id)} style={{ background: '#fff1f2', color: '#be123c', border: 'none', borderRadius: 7, padding: '6px 14px', fontSize: 13, fontWeight: 500, cursor: 'pointer' }}>🗑️ Delete</button>
                             </div>
                           ) : (
                             <span style={{ fontSize: 12, color: '#cbd5e1' }}>—</span>
@@ -296,7 +249,6 @@ const Dashboard = () => {
             </table>
           </div>
         </div>
-
       </div>
     </div>
   );

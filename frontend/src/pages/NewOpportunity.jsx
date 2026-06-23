@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import api from '../services/api';   // ← New import
 
 const NewOpportunity = () => {
   const [formData, setFormData] = useState({
@@ -31,11 +31,7 @@ const NewOpportunity = () => {
     setError('');
 
     try {
-      const token = localStorage.getItem('token');
-      await axios.post('http://localhost:2000/api/opportunities', formData, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
+      await api.post('/api/opportunities', formData);   // ← Updated
       alert('✅ Opportunity Created Successfully!');
       navigate('/dashboard');
     } catch (err) {
